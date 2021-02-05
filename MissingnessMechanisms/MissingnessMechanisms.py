@@ -1,3 +1,7 @@
+
+import collections
+import random
+
 def MCAR(df, per):
   replaced = collections.defaultdict(set)
   ix = [(row, col) for row in range(df.shape[0]) for col in range(df.shape[1])]
