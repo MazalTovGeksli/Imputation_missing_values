@@ -1,10 +1,9 @@
 
-import collections
 import random
 import pandas as pd
 import numpy as np
 
-def MCAR(df, per):
+def MCAR(data, per):
   df = data.copy()
   n, p = df.shape
   NAloc = np.full((n*p), False, dtype = bool)
