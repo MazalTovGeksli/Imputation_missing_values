@@ -1,6 +1,8 @@
 
 import collections
 import random
+import pandas as pd
+import numpy as np
 
 def MCAR(df, per):
   replaced = collections.defaultdict(set)
