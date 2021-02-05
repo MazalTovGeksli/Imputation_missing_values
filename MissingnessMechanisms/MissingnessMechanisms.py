@@ -5,15 +5,11 @@ import pandas as pd
 import numpy as np
 
 def MCAR(df, per):
-  replaced = collections.defaultdict(set)
-  ix = [(row, col) for row in range(df.shape[0]) for col in range(df.shape[1])]
-  random.shuffle(ix)
-  to_replace = int(round(per*len(ix)))
-  for row, col in ix:
-    if len(replaced[row]) < df.shape[1] - 1:
-      df.iloc[row, col] = np.nan
-      to_replace -= 1
-      replaced[row].add(col)
-      if to_replace == 0:
-        break
+  df = data.copy()
+  n, p = df.shape
+  NAloc = np.full((n*p), False, dtype = bool)
+  randomlist = random.sample(range(0, n*p), int(n * p * per))
+  NAloc[randomlist] = True
+  NAloc = np.reshape(NAloc, (n, p))
+  df[NAloc] = np.nan
   return(df)
