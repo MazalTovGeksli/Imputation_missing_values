@@ -27,26 +27,45 @@ def initial_missing_categorical_value(data, col_cat):
 def sort_missing_columns(data, mask, ascending=False):
   return data[mask.sum().sort_values(ascending=ascending).index]
 
-def miss_catboost(data, actual, cat_vars, iter = 3, iterations = 100):
-  miss_data = data.copy()
+"""
+Parameters
+----------
+cat_vars : list, None (default =  None)
+  Список индексов признаков, являющихся категориальными.
+"""
+
+def miss_catboost(data, actual = None, cat_vars = None, iter = 5, iterations = 50, sort = None):
+  if actual == None:
+    miss_data = None
+  else:
+    miss_data = data.copy()
+  
   mask = data.isna()
-  cat_vars_names = data.columns[cat_vars]
-
-  # Check if any column has all missing
   if np.any(mask.sum(axis=0) >= (data.shape[0])):
-    raise ValueError("One or more columns have all rows missing.")
+    raise ValueError("One or more columns have all rows missing.") # Check if any column has all missing
 
-  #data = sort_missing_columns(data, mask)
+  if cat_vars != None:
+    cat_vars_names = data.columns[cat_vars]
+  else:
+    cat_vars_names = []
+  
+  if sort != None:                                                              # сортировка пока что не понятно зачем нужна. С ней больше мороки...
+    data = sort_missing_columns(data, mask, ascending=sort)
+    cat_vars = [data.columns.get_loc(c) for c in cat_vars_names if c in data]
+    cat_vars_names = data.columns[cat_vars]
+  
   data = initial_missing_value(data, cat_vars)
 
   model_reg = CatBoostRegressor(verbose = False, iterations= iterations)
   model_class = CatBoostClassifier(verbose = False, iterations= iterations, loss_function = 'MultiClass')
 
+  print(cat_vars_names)
+
   err_all = np.inf
   while iter > 0:
-    #print(iter)
     error_class = 0
     error_reg = 0
+
     for i in data.columns:
       test = data[mask[i]]
       train = data.drop(test.index, axis = 0)
@@ -70,9 +89,6 @@ def miss_catboost(data, actual, cat_vars, iter = 3, iterations = 100):
         error_reg = error_reg + model_reg.evals_result_['learn']['RMSE'][iterations - 1] / np.std(y_test)
 
       data[i][mask[i]] = y_test
-    
-    #print({'ERR_REG': error_reg, 'ERR_CLASS': error_class})
-    print(metrics.mixError(actual, miss_data, data, cat_vars))
 
     if (error_reg + error_class)/2 < err_all:
       print({'err_all': err_all, 'sum(error_reg + error_class)': (error_reg + error_class)/2})
