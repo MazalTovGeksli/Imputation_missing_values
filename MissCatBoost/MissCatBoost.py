@@ -49,7 +49,7 @@ def miss_catboost(data, actual = None, cat_vars = None, iter = 5, iterations = 5
   else:
     cat_vars_names = []
   
-  if sort != None:                                                              # сортировка пока что не понятно зачем нужна. С ней больше мороки...
+  if sort != None:                                                              # сортировка пока что не понятно зачем нужна. С ней больше мороки
     data = sort_missing_columns(data, mask, ascending=sort)
     cat_vars = [data.columns.get_loc(c) for c in cat_vars_names if c in data]
     cat_vars_names = data.columns[cat_vars]
