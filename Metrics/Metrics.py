@@ -17,7 +17,7 @@ def NRMSE(actual, missing, imputation, cat_feature = None):
   for i in list_num_feature:
     ximp = ximp + imputation[i].dropna().to_list()
     xtrue = xtrue + actual[i].dropna().to_list()
-  res = np.sqrt(np.mean((np.array(ximp) - np.array(xtrue)) ** 2) / np.var(np.array(xtrue)))
+  res = np.sqrt(np.mean((np.array(ximp) - np.array(xtrue) ** 2)) / np.var(np.array(xtrue)))
   return {'NRMSE': res}
 
 def PFC(actual, missing, imputation, cat_feature = None):
