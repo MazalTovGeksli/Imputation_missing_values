@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, r2_score
 import seaborn as sns
 import matplotlib.pyplot as plt
 
@@ -71,10 +71,23 @@ class MissCatBoost():
       model.fit(X_train, y_train, eval_set = val_pool, cat_features = cat_features)
       y_test = model.predict(X_test)
       #error_reg = model.best_score_['validation']['RMSE'] / np.std(y_val) #reg error
-      error_reg = np.sqrt(np.mean((np.array(model.predict(X_val)) - np.array(y_val)) ** 2) / np.var(np.array(y_val)))
+      #error_reg = np.sqrt(np.mean((np.array(model.predict(X_val)) - np.array(y_val)) ** 2) / np.var(np.array(y_val)))
+      error_reg = 1 - (r2_score(np.array(y_val), np.array(model.predict(X_val))) if r2_score(np.array(y_val), np.array(model.predict(X_val))) > 0 else 0)
       return error_reg, y_test
 
   def print_loss(self):
+    b = []
+    for i, j in zip(self.reg_score_list, self.class_score_list):
+      b.append(i + j)
+    fig, ax = plt.subplots()
+    # make a plot
+    ax.plot(self.iter_list, b, color = "red", marker = "o")
+    # set x-axis label
+    ax.set_xlabel("iter", fontsize = 14)
+    # set y-axis label
+    ax.set_ylabel("sum(R^2, PFC)", color = "red", fontsize = 14)
+    plt.show()
+
     # create figure and axis objects with subplots()
     fig, ax = plt.subplots()
     # make a plot
@@ -82,7 +95,7 @@ class MissCatBoost():
     # set x-axis label
     ax.set_xlabel("iter", fontsize = 14)
     # set y-axis label
-    ax.set_ylabel("NRMSE", color = "red",fontsize = 14)
+    ax.set_ylabel("R^2", color = "red",fontsize = 14)
 
     # twin object for two different y-axis on the sample plot
     ax2 = ax.twinx()
